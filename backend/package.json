@@ -1,0 +1,22 @@
+{
+  "name": "nids-backend",
+  "version": "1.0.0",
+  "description": "Backend server for Network Intrusion Detection System",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "keywords": ["security", "intrusion-detection", "suricata"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "socket.io": "^4.6.1",
+    "cors": "^2.8.5",
+    "tail": "^2.2.6"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}

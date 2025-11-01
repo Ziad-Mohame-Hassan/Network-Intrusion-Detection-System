@@ -1,6 +1,25 @@
 import React from 'react';
 import { format } from 'date-fns';
-import { AlertTriangle, Shield, Activity, Radio, Download, Database, Monitor } from 'lucide-react';
+import { 
+  AlertTriangle, 
+  Shield, 
+  Activity, 
+  Radio, 
+  Download, 
+  Database, 
+  Monitor, 
+  Globe, 
+  Lock,
+  Mail,
+  FolderOpen,
+  Terminal,
+  Clock,
+  Settings,
+  Wifi,
+  MessageSquare,
+  Gamepad2,
+  Play
+} from 'lucide-react';
 import { Packet } from '../types/packet';
 import clsx from 'clsx';
 
@@ -19,6 +38,32 @@ const getActivityIcon = (activity: string) => {
       return <Database className="w-4 h-4" />;
     case 'Remote Desktop':
       return <Monitor className="w-4 h-4" />;
+    case 'Web Browsing':
+      return <Globe className="w-4 h-4" />;
+    case 'Secure Web Browsing':
+    case 'Encrypted Communication':
+      return <Lock className="w-4 h-4" />;
+    case 'Email':
+    case 'Secure Email':
+      return <Mail className="w-4 h-4" />;
+    case 'File Sharing':
+      return <FolderOpen className="w-4 h-4" />;
+    case 'Remote Shell':
+      return <Terminal className="w-4 h-4" />;
+    case 'DNS Query':
+      return <Settings className="w-4 h-4" />;
+    case 'Time Sync':
+      return <Clock className="w-4 h-4" />;
+    case 'Network Config':
+    case 'Network Diagnostic':
+      return <Wifi className="w-4 h-4" />;
+    case 'Messaging':
+      return <MessageSquare className="w-4 h-4" />;
+    case 'Gaming':
+      return <Gamepad2 className="w-4 h-4" />;
+    case 'Video Streaming':
+    case 'Audio Streaming':
+      return <Play className="w-4 h-4" />;
     default:
       return <Activity className="w-4 h-4" />;
   }

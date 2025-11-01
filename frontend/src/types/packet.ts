@@ -60,6 +60,19 @@ export type Activity =
   | 'Gaming'
   | 'Database Activity'
   | 'Remote Desktop'
+  | 'Web Browsing'
+  | 'Secure Web Browsing'
+  | 'Encrypted Communication'
+  | 'Email'
+  | 'Secure Email'
+  | 'File Sharing'
+  | 'Remote Shell'
+  | 'Time Sync'
+  | 'Network Config'
+  | 'Network Diagnostic'
+  | 'TCP Traffic'
+  | 'UDP Traffic'
+  | 'Network Traffic'
   | 'UNKNOWN';
 
 export type RiskLevel = 'LOW' | 'MEDIUM' | 'HIGH';
