@@ -120,6 +120,17 @@ io.on('connection', (socket) => {
       socket.emit('packet_batch', packetBuffer);
     }
   });
+  
+  // Handle port scan alerts from ML detector
+  socket.on('port_scan_alert', (alertData) => {
+    console.log(`\n🚨 PORT SCAN ALERT received from ML detector:`);
+    console.log(`   Source: ${alertData.source_ip} → Target: ${alertData.target_ip}`);
+    console.log(`   Ports: ${alertData.ports_scanned.join(', ')} (${alertData.port_count} ports)`);
+    console.log(`   Confidence: ${alertData.confidence}\n`);
+    
+    // Broadcast alert to all connected clients
+    io.emit('security_alert', alertData);
+  });
 });
 
 // API Routes
