@@ -2,6 +2,7 @@
 """
 Integrated ML Port Scan Detector
 Connects to the Node.js backend via Socket.IO to send real-time alerts
+Sends email notifications for detected port scans
 """
 
 import json
@@ -14,15 +15,18 @@ import sys
 from collections import defaultdict
 from datetime import datetime
 import argparse
+from email_alerter import send_port_scan_email
 
 # Configuration
 target_ip = None  # Will be set via args or auto-detect
 scan_threshold = 5  # SYN packets to distinct ports
 time_interval = 5  # seconds
 BACKEND_URL = "http://localhost:5000"
+EMAIL_COOLDOWN = 6 * 60 * 60  # 6 hours in seconds
 
 # Globals
 connection_attempts = defaultdict(list)
+last_email_sent = {}  # Track last email time per source IP
 model = None
 scaler = None
 sio = socketio.Client()
@@ -59,10 +63,12 @@ def connect_to_backend():
         return False
 
 def send_alert(src_ip, target_ip, ports_hit, prediction_confidence=1.0):
-    """Send port scan alert to backend"""
+    """Send port scan alert to backend with email rate limiting"""
+    global last_email_sent
+    
     alert_data = {
         'type': 'port_scan',
-        'timestamp': datetime.utcnow().isoformat(),
+        'timestamp': datetime.now(datetime.UTC).isoformat() if hasattr(datetime, 'UTC') else datetime.utcnow().isoformat(),
         'source_ip': src_ip,
         'target_ip': target_ip,
         'ports_scanned': ports_hit,
@@ -80,13 +86,35 @@ def send_alert(src_ip, target_ip, ports_hit, prediction_confidence=1.0):
     print(f"   ML Confidence: {prediction_confidence:.2f}")
     print(f"   Time: {alert_data['timestamp']}\n")
     
-    # Send to backend if connected
+    # Send to backend if connected (always send for real-time updates)
     if sio.connected:
         try:
             sio.emit('port_scan_alert', alert_data)
             print("✅ Alert sent to backend")
         except Exception as e:
             print(f"⚠️  Failed to send alert to backend: {e}")
+    
+    # Check email rate limit (6 hours per IP)
+    current_time = time.time()
+    last_sent = last_email_sent.get(src_ip, 0)
+    time_since_last = current_time - last_sent
+    
+    if time_since_last >= EMAIL_COOLDOWN:
+        # Send email alert
+        try:
+            success, message = send_port_scan_email(alert_data)
+            if success:
+                last_email_sent[src_ip] = current_time
+                print(f"📧 Email alert sent successfully")
+            else:
+                print(f"⚠️  Email alert failed: {message}")
+        except Exception as e:
+            print(f"⚠️  Email alert error: {str(e)}")
+    else:
+        # Email cooldown active
+        hours_left = (EMAIL_COOLDOWN - time_since_last) / 3600
+        print(f"⏳ Email cooldown active for {src_ip} ({hours_left:.1f} hours remaining)")
+        print(f"   Last email sent: {datetime.fromtimestamp(last_sent).strftime('%Y-%m-%d %H:%M:%S')}")
 
 def build_features(src_ip):
     """Build features for ML model"""
@@ -246,6 +274,7 @@ def main():
     
     print(f"📊 Scan threshold: {args.threshold} ports in {time_interval} seconds")
     print(f"📁 Log file: {args.log_file}")
+    print(f"📧 Email rate limit: 1 email per IP every {EMAIL_COOLDOWN / 3600:.0f} hours")
     print("="*60)
     print("🔍 Monitoring for port scans... (Press Ctrl+C to stop)\n")
     
