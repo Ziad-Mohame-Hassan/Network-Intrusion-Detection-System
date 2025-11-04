@@ -51,3 +51,9 @@ ml_port_scan_detector/.env
 # Logs
 *.log
 logs/
+
+# Malware Detector outputs
+malware_hashes.txt
+malware_results.txt
+hashes.txt
+vt_results.txt
